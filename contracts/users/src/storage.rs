@@ -24,23 +24,25 @@ pub fn add_user(env: &Env, user: Address) -> bool {
         .persistent()
         .get(&DataKey::Users)
         .unwrap_or_else(|| Map::new(env));
-
+    
     // If user already exists, return false
     if users.contains_key(user.clone()) {
         return false;
     }
-
+    
     // Add the user
     users.set(user.clone(), true);
-
+    
     // Update storage
-    env.storage().persistent().set(&DataKey::Users, &users);
-
+    env.storage()
+        .persistent()
+        .set(&DataKey::Users, &users);
+    
     // Set user as active by default
     env.storage()
         .persistent()
         .set(&DataKey::UserActive(user.clone()), &true);
-
+    
     // Update count
     let mut count: u64 = env
         .storage()
@@ -48,13 +50,15 @@ pub fn add_user(env: &Env, user: Address) -> bool {
         .get(&DataKey::UserCount)
         .unwrap_or(0);
     count += 1;
-    env.storage().persistent().set(&DataKey::UserCount, &count);
+    env.storage()
+        .persistent()
+        .set(&DataKey::UserCount, &count);
 
     // Newly registered users are active by default.
     env.storage()
         .persistent()
         .set(&DataKey::UserActive(user), &true);
-
+    
     true
 }
 
@@ -73,7 +77,7 @@ pub fn user_exists(env: &Env, user: Address) -> bool {
         .persistent()
         .get(&DataKey::Users)
         .unwrap_or_else(|| Map::new(env));
-
+    
     users.contains_key(user)
 }
 
@@ -90,7 +94,9 @@ pub fn reset_user_data(env: &Env, user: Address) -> bool {
     }
 
     users.remove(user.clone());
-    env.storage().persistent().set(&DataKey::Users, &users);
+    env.storage()
+        .persistent()
+        .set(&DataKey::Users, &users);
 
     let mut count: u64 = env
         .storage()
@@ -100,7 +106,9 @@ pub fn reset_user_data(env: &Env, user: Address) -> bool {
     if count > 0 {
         count -= 1;
     }
-    env.storage().persistent().set(&DataKey::UserCount, &count);
+    env.storage()
+        .persistent()
+        .set(&DataKey::UserCount, &count);
 
     env.storage()
         .persistent()
@@ -119,7 +127,7 @@ pub fn get_all_users(env: &Env) -> Vec<Address> {
         .persistent()
         .get(&DataKey::Users)
         .unwrap_or_else(|| Map::new(env));
-
+    
     let mut result = Vec::new(env);
     for (user, _) in users.iter() {
         result.push_back(user);
@@ -175,11 +183,11 @@ pub fn set_user_active_status(env: &Env, user: Address, is_active: bool) -> bool
     if !user_exists(env, user.clone()) {
         return false;
     }
-
+    
     env.storage()
         .persistent()
         .set(&DataKey::UserActive(user), &is_active);
-
+    
     true
 }
 
@@ -197,11 +205,11 @@ pub fn set_user_currency(env: &Env, user: Address, currency: String) -> bool {
     if !user_exists(env, user.clone()) {
         return false;
     }
-
+    
     env.storage()
         .persistent()
         .set(&DataKey::UserCurrency(user), &currency);
-
+    
     true
 }
 
@@ -218,10 +226,10 @@ pub fn set_user_last_login(env: &Env, user: Address, timestamp: u64) -> bool {
     if !user_exists(env, user.clone()) {
         return false;
     }
-
+    
     env.storage()
         .persistent()
         .set(&DataKey::UserLastLogin(user), &timestamp);
-
+    
     true
 }
